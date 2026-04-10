@@ -196,7 +196,8 @@ export default function App() {
         {/* Top Floating Status (Desktop Only) */}
         <div className="hidden lg:flex justify-end gap-12 mb-16 text-wedding-olive uppercase tracking-[0.2em] text-[10px] font-bold">
           <div className="text-right">
-            <p>Marriage: Tue 28 Apr. 2026</p>
+            <p>Marriage: Wed 29 Apr. 2026</p>
+
             <p className="text-wedding-gold italic">Muhurtham: 10:40 AM – 11:25 AM</p>
           </div>
           <div className="text-right border-l border-wedding-gold/20 pl-12">
@@ -221,7 +222,8 @@ export default function App() {
             className="text-center lg:text-left space-y-8"
           >
             <div className="lg:hidden mb-12 space-y-2 uppercase tracking-[0.2em] text-[10px] font-bold text-wedding-olive border-b border-wedding-gold/10 pb-8">
-              <p>Marriage: Tue 28 Apr. 2026</p>
+              <p>Marriage: Wed 29 Apr. 2026</p>
+
               <p className="text-wedding-gold italic font-medium">Muhurtham: 10:40 AM – 11:25 AM</p>
             </div>
             <h1 className="font-cursive text-7xl md:text-8xl text-wedding-olive leading-[0.8]">
