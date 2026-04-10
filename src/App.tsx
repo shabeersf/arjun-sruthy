@@ -1,11 +1,11 @@
-import React, { useState, useEffect } from 'react';
-import { MapPin, CalendarPlus, Heart } from 'lucide-react';
+import React, { useState, useEffect, useRef } from 'react';
+import { MapPin, CalendarPlus, Heart, Music, Pause, Play, Volume2 } from 'lucide-react';
+import { motion, AnimatePresence } from 'motion/react';
 
 const FloralWreath = ({ className = "" }) => (
   <svg viewBox="0 0 200 200" className={className} fill="none" xmlns="http://www.w3.org/2000/svg">
     <path d="M100 180C55.8172 180 20 144.183 20 100C20 55.8172 55.8172 20 100 20C144.183 20 180 55.8172 180 100" stroke="#b5985a" strokeWidth="1.5" strokeLinecap="round" strokeDasharray="4 4"/>
     <path d="M100 190C45.3 190 10 149.7 10 100C10 50.3 45.3 10 100 10C154.7 10 190 50.3 190 100" stroke="#6b705c" strokeWidth="0.5" strokeLinecap="round"/>
-    {/* Leaves and flowers */}
     <g fill="#6b705c" opacity="0.8">
       <path d="M30 100C30 90 40 85 50 95C40 105 30 100 30 100Z" />
       <path d="M170 100C170 90 160 85 150 95C160 105 170 100 170 100Z" />
@@ -27,22 +27,56 @@ const FloralWreath = ({ className = "" }) => (
   </svg>
 );
 
+const CircularCountdown = ({ value, label, total }) => {
+  const percentage = (value / total) * 100;
+  const radius = 35;
+  const circumference = 2 * Math.PI * radius;
+  const strokeDashoffset = circumference - (percentage / 100) * circumference;
+
+  return (
+    <div className="flex flex-col items-center">
+      <div className="relative w-20 h-20 md:w-24 md:h-24">
+        <svg className="w-full h-full -rotate-90">
+          <circle
+            cx="50%"
+            cy="50%"
+            r={radius}
+            className="stroke-wedding-light fill-none"
+            strokeWidth="4"
+          />
+          <motion.circle
+            cx="50%"
+            cy="50%"
+            r={radius}
+            className="stroke-wedding-olive fill-none"
+            strokeWidth="4"
+            strokeLinecap="round"
+            initial={{ strokeDashoffset: circumference }}
+            animate={{ strokeDashoffset }}
+            transition={{ duration: 1, ease: "easeOut" }}
+            style={{ strokeDasharray: circumference }}
+          />
+        </svg>
+        <div className="absolute inset-0 flex flex-col items-center justify-center">
+          <span className="text-xl md:text-2xl font-serif font-bold text-wedding-olive leading-none">{value}</span>
+        </div>
+      </div>
+      <span className="text-[10px] md:text-xs uppercase tracking-widest text-gray-500 mt-2 font-medium">{label}</span>
+    </div>
+  );
+};
+
 export default function App() {
-  const [timeLeft, setTimeLeft] = useState({
-    days: 0,
-    hours: 0,
-    minutes: 0,
-    seconds: 0,
-  });
+  const [timeLeft, setTimeLeft] = useState({ days: 0, hours: 0, minutes: 0, seconds: 0 });
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [hasInteracted, setHasInteracted] = useState(false);
+  const audioRef = useRef<HTMLAudioElement>(null);
 
   useEffect(() => {
-    // Target date: May 4, 2026 at 6:00 PM
     const targetDate = new Date('2026-05-04T18:00:00').getTime();
-
     const interval = setInterval(() => {
       const now = new Date().getTime();
       const difference = targetDate - now;
-
       if (difference > 0) {
         setTimeLeft({
           days: Math.floor(difference / (1000 * 60 * 60 * 24)),
@@ -50,227 +84,226 @@ export default function App() {
           minutes: Math.floor((difference % (1000 * 60 * 60)) / (1000 * 60)),
           seconds: Math.floor((difference % (1000 * 60)) / 1000),
         });
-      } else {
-        clearInterval(interval);
       }
     }, 1000);
-
     return () => clearInterval(interval);
   }, []);
+
+  const toggleMusic = () => {
+    if (audioRef.current) {
+      if (isPlaying) {
+        audioRef.current.pause();
+      } else {
+        audioRef.current.play();
+      }
+      setIsPlaying(!isPlaying);
+    }
+  };
+
+  const handleInitialClick = () => {
+    if (!hasInteracted) {
+      setHasInteracted(true);
+      if (audioRef.current) {
+        audioRef.current.play().catch(e => console.log("Autoplay blocked", e));
+        setIsPlaying(true);
+      }
+    }
+  };
 
   const addToCalendar = () => {
     const text = encodeURIComponent("Arjun & Sruthi Wedding Reception");
     const dates = "20260504T120000Z/20260504T160000Z"; 
-    const details = encodeURIComponent("Join us for the wedding reception of Arjun & Sruthi.");
     const location = encodeURIComponent("Ayodhya Auditorium, Payyanur");
-    window.open(`https://calendar.google.com/calendar/render?action=TEMPLATE&text=${text}&dates=${dates}&details=${details}&location=${location}`, '_blank');
+    window.open(`https://calendar.google.com/calendar/render?action=TEMPLATE&text=${text}&dates=${dates}&location=${location}`, '_blank');
   };
 
   return (
-    <div className="min-h-screen bg-wedding-bg flex justify-center">
-      <div className="w-full max-w-md bg-white shadow-2xl relative overflow-hidden pb-16">
-        
-        {/* Top Floral Decoration */}
-        <div className="w-full h-56 relative overflow-hidden flex items-center justify-center bg-wedding-light/30">
-          <img 
-            src="https://images.unsplash.com/photo-1519225421980-715cb0215aed?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80" 
-            alt="Floral decoration" 
-            className="absolute inset-0 w-full h-full object-cover opacity-40 mix-blend-multiply"
-            referrerPolicy="no-referrer"
-          />
-          <div className="absolute inset-0 bg-gradient-to-b from-transparent via-white/50 to-white"></div>
-          <FloralWreath className="w-48 h-48 absolute -top-12 opacity-60" />
-        </div>
+    <div className="min-h-screen bg-wedding-bg selection:bg-wedding-gold/20" onClick={handleInitialClick}>
+      <audio ref={audioRef} loop src="https://www.bensound.com/bensound-music/bensound-memories.mp3" />
+      
+      {/* Floating Music Control */}
+      <AnimatePresence>
+        {hasInteracted && (
+          <motion.button
+            initial={{ opacity: 0, scale: 0.5 }}
+            animate={{ opacity: 1, scale: 1 }}
+            onClick={(e) => { e.stopPropagation(); toggleMusic(); }}
+            className="fixed bottom-6 right-6 z-50 p-3 bg-white/80 backdrop-blur-md rounded-full shadow-lg border border-wedding-gold/20 text-wedding-gold hover:scale-110 transition-transform"
+          >
+            {isPlaying ? <Pause size={20} /> : <Play size={20} />}
+          </motion.button>
+        )}
+      </AnimatePresence>
 
-        {/* Custom Art Section */}
-        <div className="px-6 pt-8 pb-4 flex justify-center relative z-10">
-          <div className="relative w-64 h-64 flex items-center justify-center">
-            <FloralWreath className="w-full h-full absolute inset-0 z-10 pointer-events-none drop-shadow-sm" />
-            <div className="w-48 h-48 rounded-full overflow-hidden relative z-0 border-4 border-white shadow-inner">
-              <img 
-                src="https://images.unsplash.com/photo-1515934751635-c81c6bc9a2d8?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" 
-                alt="Wedding Couple" 
-                className="w-full h-full object-cover opacity-90"
-                referrerPolicy="no-referrer"
-              />
-              <div className="absolute inset-0 bg-wedding-accent/10 mix-blend-overlay"></div>
-            </div>
+      {/* Hero Header Decoration */}
+      <div className="relative w-full overflow-hidden h-[30vh]">
+        <img 
+          src="/floral_header.png" 
+          alt="Floral header" 
+          className="absolute inset-0 w-full h-full object-cover opacity-60"
+        />
+
+        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-wedding-bg/50 to-wedding-bg"></div>
+      </div>
+
+      <main className="max-w-6xl mx-auto px-6 -mt-32 relative z-10 pb-32">
+        {/* Top Floating Status (Desktop Only) */}
+        <div className="hidden lg:flex justify-end gap-12 mb-16 text-wedding-olive uppercase tracking-[0.2em] text-[10px] font-bold">
+          <div className="text-right">
+            <p>Monday</p>
+            <p className="text-wedding-gold">04th May. 2026</p>
+          </div>
+          <div className="text-right">
+            <p className="text-2xl font-serif text-wedding-gold leading-none">{timeLeft.days}</p>
+            <p>Days to go</p>
           </div>
         </div>
 
-        {/* Header Section */}
-        <div className="text-center px-6 relative z-10">
-          <p className="text-sm uppercase tracking-widest text-wedding-accent mb-4 font-medium">
-            Together with their families
-          </p>
-          <h1 className="font-cursive text-7xl text-wedding-accent leading-tight mb-2 drop-shadow-sm">
-            Arjun
-            <span className="block text-4xl my-2 text-wedding-gold">&</span>
-            Sruthi
-          </h1>
-          <p className="text-lg uppercase tracking-[0.2em] text-wedding-gold mt-6 border-y border-wedding-light py-3 inline-block px-8">
-            Wedding Reception
-          </p>
-        </div>
+        {/* Hero Content Section */}
+        <div className="grid lg:grid-cols-2 gap-12 items-center mb-24">
+          <motion.div 
+            initial={{ opacity: 0, x: -50 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            viewport={{ once: true }}
+            className="text-center lg:text-left space-y-8"
+          >
+            <h1 className="font-cursive text-7xl md:text-8xl text-wedding-olive leading-[0.8]">
+              Arjun <br/>
+              <span className="text-4xl md:text-5xl my-4 block text-wedding-gold">&</span>
+              Sruthi
+            </h1>
+            <p className="font-serif text-xl md:text-2xl text-gray-600 max-w-lg italic font-light">
+              Join us to celebrate love and new beginnings on our wedding day. Your presence will make our special day even more memorable.
+            </p>
+          </motion.div>
 
-        {/* Invitation & Countdown */}
-        <div className="mt-12 px-6 text-center">
-          <div className="flex items-center justify-center gap-3 mb-8">
-            <Heart className="w-5 h-5 text-wedding-gold fill-wedding-gold/20" />
-            <h2 className="text-2xl font-medium text-wedding-accent">You are Invited!</h2>
-            <Heart className="w-5 h-5 text-wedding-gold fill-wedding-gold/20" />
-          </div>
+          <motion.div 
+            initial={{ opacity: 0, scale: 0.8 }}
+            whileInView={{ opacity: 1, scale: 1 }}
+            viewport={{ once: true }}
+            className="flex justify-center"
+          >
+            <div className="relative w-72 h-72 md:w-96 md:h-96">
+              <FloralWreath className="absolute inset-0 w-full h-full z-10 animate-spin-slow opacity-60" />
+              <div className="absolute inset-8 rounded-full overflow-hidden border-8 border-white shadow-2xl">
+                <img 
+                  src="/hero_couple.png" 
+                  alt="Wedding Couple"
+                  className="w-full h-full object-cover"
+                />
 
-          {/* Countdown Timer */}
-          <div className="flex justify-center gap-4 mb-8">
-            {[
-              { label: 'Days', value: timeLeft.days },
-              { label: 'Hours', value: timeLeft.hours },
-              { label: 'Minutes', value: timeLeft.minutes },
-              { label: 'Seconds', value: timeLeft.seconds },
-            ].map((item, index) => (
-              <div key={index} className="flex flex-col items-center">
-                <div className="w-16 h-16 rounded-full border-2 border-wedding-accent/30 flex items-center justify-center mb-2 relative bg-white shadow-sm">
-                  <div className="absolute inset-1 rounded-full border border-wedding-accent/10"></div>
-                  <span className="text-xl font-semibold text-wedding-accent">{item.value}</span>
-                </div>
-                <span className="text-xs uppercase tracking-wider text-gray-500">{item.label}</span>
               </div>
-            ))}
+            </div>
+          </motion.div>
+        </div>
+
+        {/* Middle Floral Break */}
+        <div className="flex justify-center py-16">
+          <img 
+            src="/floral_break.png" 
+            alt="Floral decor" 
+            className="w-full max-w-2xl opacity-40 mix-blend-multiply"
+          />
+        </div>
+
+
+        {/* Invitation Section */}
+        <section className="text-center space-y-16 mb-32">
+          <div className="space-y-4">
+            <Heart className="mx-auto text-wedding-gold w-8 h-8 opacity-40" />
+            <h2 className="text-4xl md:text-5xl font-serif text-wedding-olive">You are Invited!</h2>
           </div>
-          <p className="text-sm text-gray-500 italic mb-12">
+
+          <div className="flex flex-wrap justify-center gap-6 md:gap-12">
+            <CircularCountdown value={timeLeft.days} label="Days" total={365} />
+            <CircularCountdown value={timeLeft.hours} label="Hours" total={24} />
+            <CircularCountdown value={timeLeft.minutes} label="Minutes" total={60} />
+            <CircularCountdown value={timeLeft.seconds} label="Seconds" total={60} />
+          </div>
+
+          <p className="text-gray-500 italic max-w-md mx-auto">
             Can't wait for you to be a part of our special day, it's almost time
           </p>
-        </div>
+        </section>
 
-        {/* Event Details */}
-        <div className="px-8 py-10 bg-wedding-light/30 border-y border-wedding-light relative">
-          <FloralWreath className="w-64 h-64 absolute -right-32 -top-32 opacity-10 rotate-45 pointer-events-none" />
-          <FloralWreath className="w-64 h-64 absolute -left-32 -bottom-32 opacity-10 -rotate-45 pointer-events-none" />
-          
-          {/* Reception Details */}
-          <div className="flex items-center justify-center gap-6 mb-10 relative z-10">
-            <div className="text-right">
-              <p className="text-3xl font-medium text-wedding-accent">04</p>
-              <p className="text-sm uppercase tracking-wider text-wedding-gold">May 2026</p>
-            </div>
-            <div className="w-px h-16 bg-wedding-gold/30"></div>
-            <div className="text-left">
-              <p className="font-semibold text-wedding-accent text-lg">Reception</p>
-              <p className="text-sm text-gray-600">5:30 PM - 9:30 PM</p>
-              <p className="text-sm text-gray-600 mt-1 flex items-center gap-1">
-                <MapPin className="w-3 h-3" /> Ayodhya Auditorium, Payyanur
-              </p>
-            </div>
+        {/* Event Timeline */}
+        <div className="grid md:grid-cols-2 gap-12 bg-white/40 backdrop-blur-sm rounded-3xl p-8 md:p-16 border border-white shadow-xl mb-32 relative overflow-hidden">
+          <div className="text-center md:text-right space-y-2 border-b md:border-b-0 md:border-r border-wedding-gold/20 pb-8 md:pb-0 md:pr-12">
+            <p className="text-6xl font-serif text-wedding-gold">04</p>
+            <p className="text-2xl uppercase tracking-[0.2em] text-wedding-olive">Mon</p>
+            <p className="text-sm text-gray-400">May, 2026</p>
           </div>
 
-          <div className="flex justify-center mb-10 relative z-10">
+          <div className="space-y-6 md:pl-4">
+            <div>
+              <h3 className="text-2xl font-serif text-wedding-olive mb-2">Wedding Reception</h3>
+              <p className="text-gray-600 flex items-center justify-center md:justify-start gap-2">
+                <MapPin size={16} /> Ayodhya Auditorium, Payyanur
+              </p>
+              <p className="text-gray-600 mt-1 italic">5:30 PM - 9:30 PM</p>
+            </div>
             <button 
               onClick={addToCalendar}
-              className="flex items-center gap-2 text-blue-500 hover:text-blue-600 transition-colors text-sm font-medium bg-white px-4 py-2 rounded-full shadow-sm border border-blue-100"
+              className="px-6 py-2 rounded-full border border-wedding-gold/30 text-wedding-gold hover:bg-wedding-gold hover:text-white transition-all text-sm font-medium inline-flex items-center gap-2"
             >
-              <CalendarPlus className="w-4 h-4" />
-              Add to Calendar
+              <CalendarPlus size={16} /> Add to Calendar
             </button>
           </div>
+        </div>
 
-          {/* Marriage Details */}
-          <div className="text-center space-y-3 relative z-10">
-            <div className="flex items-center justify-center gap-4 mb-4">
-              <div className="h-px bg-wedding-gold/30 flex-1"></div>
-              <Heart className="w-3 h-3 text-wedding-gold" />
-              <div className="h-px bg-wedding-gold/30 flex-1"></div>
-            </div>
-            
-            <p className="text-sm text-gray-700 leading-relaxed">
-              Marriage will be solemnised on <br/>
-              <span className="font-semibold text-wedding-accent">Wednesday, 29th April 2026</span>
-            </p>
-            <p className="text-xs text-gray-500 leading-relaxed px-4">
-              at Lavandis Convention Centre, Mokavoor Road, Eranhikkal, Calicut
-            </p>
-            <p className="text-sm font-medium text-wedding-gold mt-2">
-              Muhurtham: 10:40 AM – 11:25 AM
-            </p>
+        {/* Map Section */}
+        <div className="rounded-3xl overflow-hidden shadow-2xl border-4 border-white mb-32 h-[400px] relative group">
+           <iframe 
+            src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d15582.46781463375!2d75.20140135!3d12.1008!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3ba46506f406ec2b%3A0xc023a968600d8442!2sAyodhya%20Auditorium!5e0!3m2!1sen!2sin!4v1712750000000!5m2!1sen!2sin" 
+            className="w-full h-full grayscale hover:grayscale-0 transition-all duration-700"
+            style={{ border: 0 }} 
+            allowFullScreen={true} 
+            loading="lazy" 
+          ></iframe>
+          <div className="absolute bottom-6 left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity">
+            <a 
+              href="https://maps.app.goo.gl/mJ4g6bGMvx8jaiE87" 
+              target="_blank" 
+              className="bg-white px-8 py-3 rounded-full shadow-lg text-wedding-olive font-bold flex items-center gap-2"
+            >
+              <MapPin size={18} /> Get Location
+            </a>
           </div>
         </div>
 
-        {/* Location Section */}
-        <div className="mt-12 px-6 text-center">
-          <div className="w-full h-48 bg-gray-100 rounded-xl overflow-hidden mb-6 relative border border-wedding-light shadow-inner">
-            <img 
-              src="https://images.unsplash.com/photo-1524661135-423995f22d0b?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80" 
-              alt="Map placeholder" 
-              className="w-full h-full object-cover opacity-60"
-              referrerPolicy="no-referrer"
-            />
-            <div className="absolute inset-0 flex items-center justify-center bg-black/5">
-              <div className="bg-white p-3 rounded-full shadow-lg">
-                <MapPin className="w-8 h-8 text-red-500" />
-              </div>
-            </div>
-          </div>
-          <a 
-            href="https://maps.app.goo.gl/mJ4g6bGMvx8jaiE87?g_st=iw" 
-            target="_blank" 
-            rel="noopener noreferrer"
-            className="inline-flex items-center gap-2 px-8 py-3 bg-wedding-accent text-white rounded-full hover:bg-wedding-accent/90 transition-colors text-sm font-medium shadow-md"
-          >
-            <MapPin className="w-4 h-4" />
-            Get Location
-          </a>
-        </div>
-
-        {/* Compliments Section */}
-        <div className="mt-16 px-8 text-center space-y-6">
-          <div className="flex items-center justify-center gap-4 mb-6">
-            <div className="h-px bg-wedding-light flex-1"></div>
-            <p className="text-xs uppercase tracking-widest text-wedding-gold italic">Best Compliments from</p>
-            <div className="h-px bg-wedding-light flex-1"></div>
-          </div>
-          
-          <p className="text-sm text-gray-700 leading-relaxed">
-            Ashwin O.K, Souparnika Ashwin, <br/>
-            Thanishka Ashwin, Adwaith Sumithran O.K
-          </p>
-          
-          <div className="space-y-1 pt-4">
-            <p className="text-sm text-gray-600">Pavithra Jewellery, Payyanur</p>
-            <p className="text-sm text-gray-600">Pavithra Jewellery, Cherupuzha</p>
-            <p className="text-sm text-gray-600">Panjami Jewellery, Payyanur</p>
-          </div>
-
-          <p className="text-xs text-gray-400 italic pt-6">
-            NB: No function on previous day
-          </p>
-        </div>
+        {/* Guestbook Section */}
+        <section className="text-center space-y-12 mb-32">
+          <p className="text-gray-400 italic">No wishes to display yet.</p>
+          <button className="bg-wedding-olive text-white px-10 py-4 rounded-full shadow-xl hover:bg-wedding-olive/90 transition-all flex items-center gap-3 mx-auto">
+            <Heart size={20} className="fill-white" />
+            Send your wishes
+          </button>
+        </section>
 
         {/* Footer */}
-        <div className="mt-16 text-center pb-8 relative">
-          <FloralWreath className="w-32 h-32 mx-auto mb-4 opacity-40" />
-          <h3 className="font-cursive text-4xl text-wedding-accent mb-6">Arjun & Sruthi</h3>
-          <p className="text-sm text-gray-600 px-8 mb-8">
+        <footer className="text-center space-y-8">
+          <h4 className="font-cursive text-5xl text-wedding-olive">Arjun & Sruthi</h4>
+          <p className="text-gray-600 max-w-sm mx-auto">
             We are looking forward to your presence on our wedding day and the party thereafter.
           </p>
-          <p className="text-xl font-medium text-wedding-accent mb-12">Thank you</p>
-          
-          <div className="text-xs text-gray-400 tracking-widest uppercase">
-            Wedads Photography
+          <div className="pt-16 pb-8 border-t border-wedding-gold/10">
+            <p className="text-3xl font-serif text-wedding-gold">Thank you</p>
           </div>
-        </div>
 
-        {/* Bottom Floral Decoration */}
-        <div className="absolute bottom-0 left-0 w-full h-40 pointer-events-none flex items-end justify-center overflow-hidden">
-          <img 
-            src="https://images.unsplash.com/photo-1519225421980-715cb0215aed?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80" 
-            alt="Floral decoration" 
-            className="absolute inset-0 w-full h-full object-cover opacity-30 mix-blend-multiply rotate-180"
-            referrerPolicy="no-referrer"
-          />
-          <div className="absolute inset-0 bg-gradient-to-t from-transparent via-white/80 to-white"></div>
-        </div>
+        </footer>
+      </main>
 
-      </div>
+      {/* CSS for slow spin */}
+      <style>{`
+        @keyframes spin-slow {
+          from { transform: rotate(0deg); }
+          to { transform: rotate(360deg); }
+        }
+        .animate-spin-slow {
+          animation: spin-slow 20s linear infinite;
+        }
+      `}</style>
     </div>
   );
 }
+
