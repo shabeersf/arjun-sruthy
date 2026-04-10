@@ -196,16 +196,21 @@ export default function App() {
         {/* Top Floating Status (Desktop Only) */}
         <div className="hidden lg:flex justify-end gap-12 mb-16 text-wedding-olive uppercase tracking-[0.2em] text-[10px] font-bold">
           <div className="text-right">
+            <p>Marriage: Tue 28 Apr. 2026</p>
+            <p className="text-wedding-gold italic">Muhurtham: 10:40 AM – 11:25 AM</p>
+          </div>
+          <div className="text-right border-l border-wedding-gold/20 pl-12">
             <p className="text-wedding-gold">Reception: Mon 04 May. 2026</p>
           </div>
 
-          <div className="text-right">
+          <div className="text-right border-l border-wedding-gold/20 pl-12">
             <p className="text-2xl font-serif text-wedding-gold leading-none">
               {timeLeft.days}
             </p>
             <p>Days to go</p>
           </div>
         </div>
+
 
         {/* Hero Content Section */}
         <div className="grid lg:grid-cols-2 gap-12 items-center mb-24">
@@ -215,6 +220,10 @@ export default function App() {
             viewport={{ once: true }}
             className="text-center lg:text-left space-y-8"
           >
+            <div className="lg:hidden mb-12 space-y-2 uppercase tracking-[0.2em] text-[10px] font-bold text-wedding-olive border-b border-wedding-gold/10 pb-8">
+              <p>Marriage: Tue 28 Apr. 2026</p>
+              <p className="text-wedding-gold italic font-medium">Muhurtham: 10:40 AM – 11:25 AM</p>
+            </div>
             <h1 className="font-cursive text-7xl md:text-8xl text-wedding-olive leading-[0.8]">
               Arjun <br />
               <span className="text-4xl md:text-5xl my-4 block text-wedding-gold">
@@ -225,6 +234,7 @@ export default function App() {
             <p className="text-sm uppercase tracking-[0.3em] text-wedding-gold font-bold mb-4">
               Wedding Reception
             </p>
+
             <p className="font-serif text-xl md:text-2xl text-gray-600 max-w-lg italic font-light">
               Join us to celebrate love and new beginnings on our wedding
               reception. Your presence will make our special day even more
@@ -252,13 +262,14 @@ export default function App() {
         </div>
 
         {/* Middle Floral Break */}
-        <div className="flex justify-center py-16">
+        <div className="flex justify-center pt-4 pb-8">
           <img
             src="/floral_break.png"
             alt="Floral decor"
             className="w-full max-w-2xl opacity-40 mix-blend-multiply"
           />
         </div>
+
 
         {/* Invitation Section */}
         <section className="text-center space-y-16 mb-32">
@@ -293,29 +304,8 @@ export default function App() {
           </p>
         </section>
 
-        {/* Event Timeline */}
+        {/* Event Timeline - Focused on Reception */}
         <div className="space-y-8 mb-32">
-          {/* Marriage Detail */}
-          <div className="grid md:grid-cols-2 gap-12 bg-white/40 backdrop-blur-sm rounded-3xl p-8 md:p-16 border border-white shadow-xl relative overflow-hidden">
-            <div className="text-center md:text-right space-y-2 border-b md:border-b-0 md:border-r border-wedding-gold/20 pb-8 md:pb-0 md:pr-12">
-              <p className="text-6xl font-serif text-wedding-gold">28</p>
-              <p className="text-2xl uppercase tracking-[0.2em] text-wedding-olive">
-                Tue
-              </p>
-              <p className="text-sm text-gray-400">April, 2026</p>
-            </div>
-            <div className="space-y-4 md:pl-4">
-              <div>
-                <h3 className="text-2xl font-serif text-wedding-olive mb-2">
-                  Marriage Ceremony
-                </h3>
-                <p className="text-gray-600 italic">
-                  Muhurtham: 10:40 AM – 11:25 AM
-                </p>
-              </div>
-            </div>
-          </div>
-
           {/* Reception Detail */}
           <div className="grid md:grid-cols-2 gap-12 bg-white/40 backdrop-blur-sm rounded-3xl p-8 md:p-16 border border-white shadow-xl relative overflow-hidden">
             <div className="text-center md:text-right space-y-2 border-b md:border-b-0 md:border-r border-wedding-gold/20 pb-8 md:pb-0 md:pr-12">
@@ -344,6 +334,7 @@ export default function App() {
             </div>
           </div>
         </div>
+
 
         {/* Map Section */}
         <div className="rounded-3xl overflow-hidden shadow-2xl border-4 border-white mb-32 h-[400px] relative group">
