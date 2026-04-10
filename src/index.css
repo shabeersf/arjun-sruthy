@@ -1,0 +1,18 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Montserrat", ui-sans-serif, system-ui, sans-serif;
+  --font-cursive: "Great Vibes", cursive;
+  
+  --color-wedding-bg: #fcfbf9;
+  --color-wedding-text: #4a4a4a;
+  --color-wedding-accent: #6b705c;
+  --color-wedding-gold: #b5985a;
+  --color-wedding-light: #f4f1eb;
+}
+
+body {
+  background-color: var(--color-wedding-bg);
+  color: var(--color-wedding-text);
+  font-family: var(--font-sans);
+}
